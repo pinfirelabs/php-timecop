@@ -1,0 +1,2 @@
+tc_timeval.lo: /rechub/open-source/php-timecop/tc_timeval.c \
+  /rechub/open-source/php-timecop/tc_timeval.h

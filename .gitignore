@@ -53,3 +53,6 @@ tests/*.out
 .#*
 .DS_Store
 Thumbs.db
+
+# Ignore local Claude configuration
+CLAUDE.local.md

@@ -1,29 +1,24 @@
 <?php
-extension_loaded('timecop') or die('skip timecop module not available');
-if (isset($required_version)) {
-    if (version_compare(PHP_VERSION, $required_version, "<")) {
-        die("skip PHP ${required_version}+ required for this test");
-    }
+// Skip check for timecop tests
+
+if (!extension_loaded('timecop')) {
+    die("skip timecop extension not loaded");
 }
-if (isset($required_func)) {
-    foreach ($required_func as $func_name) {
-        if (!function_exists($func_name)) {
-            die("skip $func_name() function is not available.");
+
+// Check required functions
+if (isset($required_func) && is_array($required_func)) {
+    foreach ($required_func as $func) {
+        if (!function_exists($func)) {
+            die("skip function $func not found");
         }
     }
 }
-if (isset($required_class)) {
-    foreach ($required_class as $class_name) {
-        if (!class_exists($class_name)) {
-            die("skip $class_name class is not available.");
-        }
-    }
-}
-if (isset($required_method)) {
-    foreach ($required_method as $v) {
-        list($class_name, $method_name) = $v;
-        if (!method_exists($class_name, $method_name)) {
-            die("skip $class_name::$method_name() method is not available.");
+
+// Check required classes
+if (isset($required_class) && is_array($required_class)) {
+    foreach ($required_class as $class) {
+        if (!class_exists($class)) {
+            die("skip class $class not found");
         }
     }
 }

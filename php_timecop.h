@@ -179,6 +179,31 @@ struct timecop_override_class_entry {
 	char *save_method;
 };
 
+#if PHP_VERSION_ID >= 80000
+#define call_php_method_with_0_params(obj, ce, method_name, retval) \
+	_call_php_method_with_0_params(obj, ce, method_name, retval)
+
+#define call_php_method_with_1_params(obj, ce, method_name, retval, arg1)	\
+	_call_php_method_with_1_params(obj, ce, method_name, retval, arg1)
+
+#define call_php_method_with_2_params(obj, ce, method_name, retval, arg1, arg2) \
+	_call_php_method_with_2_params(obj, ce, method_name, retval, arg1, arg2)
+
+#define call_php_function_with_0_params(function_name, retval) \
+	_call_php_function_with_0_params(function_name, retval)
+
+#define call_php_function_with_1_params(function_name, retval, arg1) \
+	_call_php_function_with_1_params(function_name, retval, arg1)
+
+#define call_php_function_with_2_params(function_name, retval, arg1, arg2) \
+	_call_php_function_with_2_params(function_name, retval, arg1, arg2)
+
+#define call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3) \
+	_call_php_function_with_3_params(function_name, retval, arg1, arg2, arg3)
+
+#define call_php_function_with_params(function_name, retval, param_count, params) \
+	_call_php_function_with_params(function_name, retval, param_count, params)
+#else
 #define call_php_method_with_0_params(obj, ce, method_name, retval) \
 	_call_php_method_with_0_params(obj, ce, method_name, retval TSRMLS_CC)
 
@@ -202,6 +227,7 @@ struct timecop_override_class_entry {
 
 #define call_php_function_with_params(function_name, retval, param_count, params) \
 	_call_php_function_with_params(function_name, retval, param_count, params TSRMLS_CC)
+#endif
 
 /* In every utility function you add that needs to use variables 
    in php_timecop_globals, call TSRMLS_FETCH(); after declaring other 

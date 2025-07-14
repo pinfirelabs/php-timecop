@@ -185,6 +185,19 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_timecop_date_create, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
+#if PHP_VERSION_ID >= 80000
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_timecop_date_create_from_format, 0, 2, DateTime, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, object, DateTimeZone, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_timecop_date_create_immutable_from_format, 0, 2, DateTimeImmutable, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, object, DateTimeZone, 1, "null")
+ZEND_END_ARG_INFO()
+#else
 ZEND_BEGIN_ARG_INFO_EX(arginfo_timecop_date_create_from_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, time)
@@ -194,6 +207,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_timecop_date_create_from_format, 0, 0, 2)
 	ZEND_ARG_INFO(0, object)
 #endif
 ZEND_END_ARG_INFO()
+#define arginfo_timecop_date_create_immutable_from_format arginfo_timecop_date_create_from_format
+#endif
 
 /* {{{ timecop_functions[] */
 const zend_function_entry timecop_functions[] = {
@@ -220,7 +235,7 @@ const zend_function_entry timecop_functions[] = {
 	PHP_FE(timecop_date_create, arginfo_timecop_date_create)
 	PHP_FE(timecop_date_create_from_format, arginfo_timecop_date_create_from_format)
 	PHP_FE(timecop_date_create_immutable, arginfo_timecop_date_create)
-	PHP_FE(timecop_date_create_immutable_from_format, arginfo_timecop_date_create_from_format)
+	PHP_FE(timecop_date_create_immutable_from_format, arginfo_timecop_date_create_immutable_from_format)
 	{NULL, NULL, NULL}
 };
 /* }}} */
@@ -253,7 +268,7 @@ static zend_function_entry timecop_funcs_orig_date[] = {
 static zend_function_entry timecop_funcs_immutable[] = {
 	PHP_ME(TimecopDateTimeImmutable, __construct, arginfo_timecop_date_create,
 		   ZEND_ACC_CTOR | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createFromFormat, timecop_date_create_immutable_from_format, arginfo_timecop_date_create_from_format,
+	PHP_ME_MAPPING(createFromFormat, timecop_date_create_immutable_from_format, arginfo_timecop_date_create_immutable_from_format,
 				   ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	{NULL, NULL, NULL}
 };
@@ -876,7 +891,7 @@ static int get_formatted_mock_time(zval *time, zval *timezone_obj, zval *retval_
  *     return $fixed_usec;
  * }
  */
-static long get_mock_fraction(zval *time, zval *timezone_obj TSRMLS_DC)
+static long get_mock_fraction(zval *time, zval *timezone_obj)
 {
 	zval dt1, dt2, usec1, usec2;
 	zend_long fixed_usec;
@@ -1339,7 +1354,7 @@ static void _timecop_orig_datetime_constructor(INTERNAL_FUNCTION_PARAMETERS, int
 	zval *arg1 = NULL, *arg2 = NULL;
 	zend_class_entry *real_ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|zz", &arg1, &arg2) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zz", &arg1, &arg2) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1371,7 +1386,7 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 	const char *real_func;
 	zend_class_entry *real_ce;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|sO!", &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sO!", &orig_time_str, &orig_time_len, &orig_timezone, TIMECOP_G(ce_DateTimeZone)) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -1388,7 +1403,7 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 		real_ce = TIMECOP_G(ce_DateTime);
 	}
 
-	if (get_formatted_mock_time(&orig_time, orig_timezone, &fixed_time, &fixed_timezone TSRMLS_CC) == 0) {
+	if (get_formatted_mock_time(&orig_time, orig_timezone, &fixed_time, &fixed_timezone) == 0) {
 		arg1 = &fixed_time;
 		arg2 = &fixed_timezone;
 	} else {
@@ -1597,7 +1612,7 @@ static inline zval* _call_php_method_with_2_params(zval *object_pp, zend_class_e
 
 static inline zval* _call_php_method(zval *object_pp, zend_class_entry *obj_ce, const char *method_name, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
-	return zend_call_method(object_pp, obj_ce, NULL, method_name, strlen(method_name), retval_ptr, param_count, arg1, arg2);
+	return zend_call_method(object_pp ? Z_OBJ_P(object_pp) : NULL, obj_ce, NULL, method_name, strlen(method_name), retval_ptr, param_count, arg1, arg2);
 }
 
 static inline void _call_php_function_with_0_params(const char *function_name, zval *retval_ptr)
@@ -1636,7 +1651,7 @@ static inline void _call_php_function_with_params(const char *function_name, zva
 	zval callable;
 	ZVAL_STRING(&callable, function_name);
 
-	call_user_function_ex(EG(function_table), NULL, &callable, retval_ptr, param_count, params, 1, NULL);
+	call_user_function(EG(function_table), NULL, &callable, retval_ptr, param_count, params);
 
 	zval_ptr_dtor(&callable);
 }
