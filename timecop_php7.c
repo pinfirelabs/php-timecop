@@ -1391,7 +1391,7 @@ static void _timecop_datetime_constructor_ex(INTERNAL_FUNCTION_PARAMETERS, zval 
 	}
 
 	if (orig_time_str == NULL) {
-		ZVAL_NULL(&orig_time);
+		ZVAL_STRING(&orig_time, "now");
 	} else {
 		ZVAL_STRINGL(&orig_time, orig_time_str, orig_time_len);
 	}
