@@ -154,15 +154,23 @@ ZEND_END_MODULE_GLOBALS(timecop)
  */
 #define GUARD_FUNCTION_ARG_INFO_BEGIN(zend_func) { \
     zend_arg_info *orig_arg_info; \
+    HashTable *orig_attributes; \
+    zend_string *orig_doc_comment; \
     zend_function *zf = zend_func; \
     if (zf->type == ZEND_INTERNAL_FUNCTION) { \
         orig_arg_info = zf->common.arg_info; \
+        orig_attributes = zf->common.attributes; \
+        orig_doc_comment = zf->common.doc_comment; \
         zf->common.arg_info = NULL; \
+        zf->common.attributes = NULL; \
+        zf->common.doc_comment = NULL; \
     }
 
 #define GUARD_FUNCTION_ARG_INFO_END() \
     if (zf->type == ZEND_INTERNAL_FUNCTION) { \
         zf->common.arg_info = orig_arg_info; \
+        zf->common.attributes = orig_attributes; \
+        zf->common.doc_comment = orig_doc_comment; \
     } \
 }
 

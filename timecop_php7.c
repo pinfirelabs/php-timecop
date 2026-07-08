@@ -1612,7 +1612,11 @@ static inline zval* _call_php_method_with_2_params(zval *object_pp, zend_class_e
 
 static inline zval* _call_php_method(zval *object_pp, zend_class_entry *obj_ce, const char *method_name, zval *retval_ptr, int param_count, zval* arg1, zval* arg2)
 {
+#if PHP_VERSION_ID >= 80000
 	return zend_call_method(object_pp ? Z_OBJ_P(object_pp) : NULL, obj_ce, NULL, method_name, strlen(method_name), retval_ptr, param_count, arg1, arg2);
+#else
+	return zend_call_method(object_pp, obj_ce, NULL, method_name, strlen(method_name), retval_ptr, param_count, arg1, arg2);
+#endif
 }
 
 static inline void _call_php_function_with_0_params(const char *function_name, zval *retval_ptr)
